@@ -1,0 +1,130 @@
+----------------------------------------------------------------------------------                         
+-- Company:                                                                                                
+-- Engineer:                                                                                               
+--                                                                                                         
+-- Create Date: 11/06/2025 02:25:02 PM                                                                     
+-- Design Name:                                                                                            
+-- Module Name: demo - Behavioral                                                                          
+-- Project Name:                                                                                           
+-- Target Devices:                                                                                         
+-- Tool Versions:                                                                                          
+-- Description:                                                                                            
+--                                                                                                         
+-- Dependencies:                                                                                           
+--                                                                                                         
+-- Revision:                                                                                               
+-- Revision 0.01 - File Created                                                                            
+-- Additional Comments:                                                                                    
+--                                                                                                         
+----------------------------------------------------------------------------------                         
+                                                                                                           
+                                                                                                           
+library IEEE;                                                                                              
+use IEEE.STD_LOGIC_1164.ALL;                                                                               
+                                                                                                           
+-- Uncomment the following library declaration if using                                                    
+-- arithmetic functions with Signed or Unsigned values                                                     
+use IEEE.NUMERIC_STD.ALL;                                                                                  
+                                                                                                           
+-- Uncomment the following library declaration if instantiating                                            
+-- any Xilinx leaf cells in this code.                                                                     
+--library UNISIM;                                                                                          
+--use UNISIM.VComponents.all;                                                                              
+                                                                                                           
+entity LAB1H1 is                                                                                            
+    Port ( CLK: in std_logic;
+	RESET: in std_logic;                                                                              
+            SW : in STD_LOGIC_VECTOR (8 downto 0);                                                         
+           SEG: out std_logic_vector(7 downto 0);                                                          
+           AN : out STD_LOGIC_VECTOR (7 downto 0));                                                        
+end LAB1H1;                                                                                                 
+                                                                                                           
+architecture Behavioral of LAB1H1 is                                                                        
+        constant SEC_PULSE : natural:= 1000 - 1; -- refresh per 1khz                                         
+                                                                                                           
+  signal sec_cnt   : unsigned(23 downto 0) := (others => '0');  -- enough for 6250                         
+  signal dgt_cnt   : unsigned(3 downto 0)  := (others => '0');  -- selects digit 0..9  
+  signal bigdgt_cnt   : unsigned(2 downto 0)  := (others => '0');  -- selects digit 0..9
+  signal min_cnt   : unsigned(2 downto 0)  := (others => '0');  -- selects digit 0..9
+  signal mux_idx   : std_logic_vector(2 downto 0);                   
+  signal cur_hex   : std_logic_vector(3 downto 0);                                                         
+                                                                                                           
+                                                                                                           
+                                                                                                           
+  -- Active-low 7-seg codes (DP is MSB, keep off = '1')                                                    
+  function hex_to_seg(h : std_logic_vector(3 downto 0)) return std_logic_vector is                         
+  begin                                                                                                    
+    case h is                                                                                              
+      when x"0" => return "11000000"; -- 0                                                                 
+      when x"1" => return "11111001"; -- 1                                                                 
+      when x"2" => return "10100100"; -- 2                                                                 
+      when x"3" => return "10110000"; -- 3                                                                 
+      when x"4" => return "10011001"; -- 4                                                                 
+      when x"5" => return "10010010"; -- 5                                                                 
+      when x"6" => return "10000010"; -- 6                                                                 
+      when x"7" => return "11111000"; -- 7                                                                 
+      when x"8" => return "10000000"; -- 8                                                                 
+      when x"9" => return "10010000"; -- 9 
+      when x"A" => return "10001000"; -- A                                                                 
+      when x"B" => return "10000011"; -- b (as in your table)                                              
+      when x"C" => return "11000110"; -- C                                                                 
+      when x"D" => return "10100001"; -- d                                                                 
+      when x"E" => return "10000110"; -- E                                                                 
+      when x"F" => return "10001110"; -- F s                                                                                                                               
+      when others => return "11111111";                                                               
+    end case;                                                                                              
+  end function;                                                                                            
+                                                                                                           
+Begin                                                                                                      
+                                                                                                           
+SEC_COUNTER: PROCESS(CLK, reset)                                                                                      
+    begin                                                                                                  
+       if rising_edge(CLK) then 
+	if reset = '1' then
+	   sec_cnt <= (others => '0');
+	   dgt_cnt <= (others => '0');
+        end if;                                                              
+      if sec_cnt = SEC_PULSE then 
+	mux_idx <= '0';                                                                           
+        sec_cnt <= (others => '0');                                                                        
+        dgt_cnt <= dgt_cnt + 1;
+	If dgt_cnt = "1001" then
+	 dgt_cnt <= (others => '0');
+	min_cnt <= min_cnt + 1;                -- 0..7 rollover (unsigned wraps naturally)               
+      else                                                                                                 
+        sec_cnt <= sec_cnt + 1;                                                                            
+      end if;                                                                                              
+    end if;
+    end if;                                                                                               
+END process SEC_COUNTER;                                                                                       
+                   
+BIGSEC_COUNTER: PROCESS (CLK, reset)
+     begin                                                                                                  
+       if rising_edge(CLK) then 
+	if reset = '1' then
+	   bigdgt_cnt  <= (others => '0');
+        end if; 
+        if dgt_cnt  = "1001" then    
+		bigdgt_cnt <= bigdgt_cnt + 1;	
+		mux_idx <= '1';
+	end if;
+	if min_cnt = "0101" then 
+		 bigdgt_cnt  <= (others => '0');
+		min_cnt <= (others=>'0');
+	end if;
+      end if;
+END PROCESS BIGSEC_COUNTER; 
+                                                                                        
+-- Compute value for the currently selected digit: (SW + mux_idx) mod 16                                   
+cur_hex <= std_logic_vector(resize(bigdgt_cnt, 4) + resize(dgt_cnt, 4));   -- zero-extend mux_idx to 4 bits                                                            
+                                       -- keep low 4 bits (mod 16)                                         
+                                                                                                           
+  -- Drive the active digit enable (assumes active-LOW enables on AN)                                      
+  with mux_idx select                                                                                      
+    AN <= "11111110" when "000",   -- digit 0 active                                                       
+          "11111101" when "001",   -- digit 1 active                                                                                                                                 
+          "01111111" when others;  -- "111" -> digit 7                                                     
+                                                                                                           
+  -- Map nibble to segments; DP off                                                                        
+  Seg <= hex_to_seg(cur_hex);                                                                              
+end Behavioral;                                                
