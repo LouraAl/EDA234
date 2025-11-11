@@ -1,0 +1,59 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/Progs/questasim64_10.4a/examples
+T_opt
+!s110 1762898572
+VAjzh1RVH;=]eoSHS@I]5f0
+04 6 10 work lab1h1 behavioral 1
+=1-cc96e50c49e5-6913b289-33c-5a5c
+o-quiet -auto_acc_if_foreign -work work
+n@_opt
+OL;O;10.4a;61
+Elab1h1
+Z0 w1762898543
+Z1 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z3 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+Z4 dZ:/EDA234 lab 1 handin
+Z5 8Z:\EDA234 lab 1 handin\LAB1H1.vhd
+Z6 FZ:\EDA234 lab 1 handin\LAB1H1.vhd
+l0
+L35
+VWPRceWa0]OdFmAHlJJ`ma0
+!s100 NaQ?8EAMX81f=<5oJboHn2
+Z7 OL;C;10.4a;61
+32
+Z8 !s110 1762898555
+!i10b 1
+Z9 !s108 1762898555.000000
+Z10 !s90 -reportprogress|300|-work|work|-2002|-explicit|-vopt|-stats=none|Z:\EDA234 lab 1 handin\LAB1H1.vhd|
+Z11 !s107 Z:\EDA234 lab 1 handin\LAB1H1.vhd|
+!i113 0
+Z12 o-work work -2002 -explicit
+Z13 tExplicit 1
+Abehavioral
+R1
+R2
+R3
+DEx4 work 6 lab1h1 0 22 WPRceWa0]OdFmAHlJJ`ma0
+l57
+L46
+V31i>W0ofX8hNCNOT3;0C40
+!s100 dB:SV<:AeWhIa[@G@F3jk0
+R7
+32
+R8
+!i10b 1
+R9
+R10
+R11
+!i113 0
+R12
+R13
