@@ -103,8 +103,8 @@ BEGIN
 
     WAIT FOR 800 ns; -- sss ns
     WAIT UNTIL an_tb_signal = "11111101";
-    ASSERT (seg_tb_signal ="10000010")
-    REPORT "Error: Digit 6 fail"
+    ASSERT (seg_tb_signal ="11111000")
+    REPORT "Error: Digit 7 fail"
     SEVERITY ERROR;
 
 
