@@ -24,14 +24,15 @@ ARCHITECTURE arch_LAB1H1_tb OF LAB1H1_tb IS
   SIGNAL reset_tb_signal: STD_LOGIC;
   SIGNAL seg_tb_signal: STD_LOGIC_VECTOR(7 DOWNTO 0);
   SIGNAL an_tb_signal: STD_LOGIC_VECTOR(7 DOWNTO 0);
+  
 
 BEGIN
 
   uut_comp:
   COMPONENT LAB1H1
     generic map (
-      CTRL_max => 25 - 1,
-      sec_pulse_max => 1000 - 1
+      CTRL_max => 3,
+      sec_pulse_max => 3
     )
     PORT MAP(
       CLK => clk_tb_signal,
@@ -40,49 +41,87 @@ BEGIN
       AN => an_tb_signal
     );
 
-  reset_tb_signal <= '1',
-                     '0' AFTER 320 ns;  -- Increased reset time
+  reset_tb_signal <= '0',
+                     '1' AFTER 320 ns;  -- Increased reset time
 
   clk_proc:
   PROCESS
   BEGIN
-    WAIT FOR 50 ns;
+    WAIT FOR 10 ns;
     clk_tb_signal <= NOT(clk_tb_signal);
   END PROCESS clk_proc;
 
   test_proc:
   PROCESS
   BEGIN
-    WAIT FOR 150 ns; -- 150 ns
-    ASSERT (reset_tb_signal='1')
-    REPORT "Error: Reset should be active at 150ns"
+
+    WAIT FOR 370 ns; -- 320 ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="11000000")
+    REPORT "Error: Digit 0 fail"
     SEVERITY ERROR;
 
-    WAIT FOR 200 ns; -- 350 ns
-    ASSERT (reset_tb_signal='0')
-    REPORT "Error: Reset should be inactive at 350ns"
+    WAIT FOR 800 ns; -- 1200 ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="11111001")
+    REPORT "Error: Digit 1 fail"
     SEVERITY ERROR;
 
-    WAIT FOR 500 ns; -- 850 ns
-    ASSERT (an_tb_signal="11111110" OR an_tb_signal="11111101")
-    REPORT "Error: Should have one display active at 850ns"
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10100100")
+    REPORT "Error: Digit 2 fail"
     SEVERITY ERROR;
 
-    WAIT FOR 2000 ns; -- 2850 ns
-    ASSERT (seg_tb_signal="11000000" OR seg_tb_signal="11111001" OR 
-            seg_tb_signal="10100100" OR seg_tb_signal="10110000" OR
-            seg_tb_signal="10011001" OR seg_tb_signal="10010010" OR
-            seg_tb_signal="10000010" OR seg_tb_signal="11111000" OR
-            seg_tb_signal="10000000" OR seg_tb_signal="10010000")
-    REPORT "Error: Invalid segment pattern at 2850ns"
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10110000")
+    REPORT "Error: Digit 3 fail"
     SEVERITY ERROR;
 
-    -- Check that multiplexing is working by watching AN toggle
-    WAIT FOR 5000 ns; -- 7850 ns
-    ASSERT (an_tb_signal="11111110" OR an_tb_signal="11111101")
-    REPORT "Error: Should still have one display active at 7850ns"
+
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10011001")
+    REPORT "Error: Digit 4 fail"
     SEVERITY ERROR;
 
+
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10010010")
+    REPORT "Error: Digit 5 fail"
+    SEVERITY ERROR;
+
+
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10000010")
+    REPORT "Error: Digit 6 fail"
+    SEVERITY ERROR;
+
+
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10000010")
+    REPORT "Error: Digit 6 fail"
+    SEVERITY ERROR;
+
+
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10000000")
+    REPORT "Error: Digit 8 fail"
+    SEVERITY ERROR;
+
+
+    WAIT FOR 800 ns; -- sss ns
+    WAIT UNTIL an_tb_signal = "11111101";
+    ASSERT (seg_tb_signal ="10010000")
+    REPORT "Error: Digit 9 fail"
+    SEVERITY ERROR;
+
+    
     WAIT FOR 10000 ns;
 
     REPORT "Test completed successfully!"
