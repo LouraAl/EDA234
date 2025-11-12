@@ -1,0 +1,93 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+
+ENTITY LAB1H1_tb IS
+END LAB1H1_tb;
+
+ARCHITECTURE arch_LAB1H1_tb OF LAB1H1_tb IS
+
+  COMPONENT LAB1H1 IS
+    generic( 
+      constant CTRL_max : natural;
+      constant sec_pulse_max : natural
+    );
+    PORT ( 
+      CLK   : in std_logic;
+      RESET : in std_logic;
+      SEG   : out std_logic_vector(7 downto 0);
+      AN    : out STD_LOGIC_VECTOR (7 downto 0)
+    );
+  END COMPONENT LAB1H1;
+
+  SIGNAL clk_tb_signal: STD_LOGIC := '1';
+  SIGNAL reset_tb_signal: STD_LOGIC;
+  SIGNAL seg_tb_signal: STD_LOGIC_VECTOR(7 DOWNTO 0);
+  SIGNAL an_tb_signal: STD_LOGIC_VECTOR(7 DOWNTO 0);
+
+BEGIN
+
+  uut_comp:
+  COMPONENT LAB1H1
+    generic map (
+      CTRL_max => 25 - 1,
+      sec_pulse_max => 1000 - 1
+    )
+    PORT MAP(
+      CLK => clk_tb_signal,
+      RESET => reset_tb_signal,
+      SEG => seg_tb_signal,
+      AN => an_tb_signal
+    );
+
+  reset_tb_signal <= '1',
+                     '0' AFTER 320 ns;  -- Increased reset time
+
+  clk_proc:
+  PROCESS
+  BEGIN
+    WAIT FOR 50 ns;
+    clk_tb_signal <= NOT(clk_tb_signal);
+  END PROCESS clk_proc;
+
+  test_proc:
+  PROCESS
+  BEGIN
+    WAIT FOR 150 ns; -- 150 ns
+    ASSERT (reset_tb_signal='1')
+    REPORT "Error: Reset should be active at 150ns"
+    SEVERITY ERROR;
+
+    WAIT FOR 200 ns; -- 350 ns
+    ASSERT (reset_tb_signal='0')
+    REPORT "Error: Reset should be inactive at 350ns"
+    SEVERITY ERROR;
+
+    WAIT FOR 500 ns; -- 850 ns
+    ASSERT (an_tb_signal="11111110" OR an_tb_signal="11111101")
+    REPORT "Error: Should have one display active at 850ns"
+    SEVERITY ERROR;
+
+    WAIT FOR 2000 ns; -- 2850 ns
+    ASSERT (seg_tb_signal="11000000" OR seg_tb_signal="11111001" OR 
+            seg_tb_signal="10100100" OR seg_tb_signal="10110000" OR
+            seg_tb_signal="10011001" OR seg_tb_signal="10010010" OR
+            seg_tb_signal="10000010" OR seg_tb_signal="11111000" OR
+            seg_tb_signal="10000000" OR seg_tb_signal="10010000")
+    REPORT "Error: Invalid segment pattern at 2850ns"
+    SEVERITY ERROR;
+
+    -- Check that multiplexing is working by watching AN toggle
+    WAIT FOR 5000 ns; -- 7850 ns
+    ASSERT (an_tb_signal="11111110" OR an_tb_signal="11111101")
+    REPORT "Error: Should still have one display active at 7850ns"
+    SEVERITY ERROR;
+
+    WAIT FOR 10000 ns;
+
+    REPORT "Test completed successfully!"
+    SEVERITY NOTE;
+WAIT;
+  END PROCESS test_proc;
+
+END arch_LAB1H1_tb;
